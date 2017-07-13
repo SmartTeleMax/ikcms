@@ -187,18 +187,20 @@ class Component(base.Component):
     def format_datetime(self, locale, dt, format):
         return babel.dates.format_datetime(dt, format, locale=locale)
 
-    def date(self, locale, dt, **kwargs):
+    def date(self, locale, dt, format=None, **kwargs):
         optional_year = kwargs.get('optional_year', False)
-        format = self.DATE_FORMATS[locale]
+        if format is None:
+            format = self.DATE_FORMATS[locale]
         if optional_year:
             today = datetime.date.today()
             if today.year == dt.year and (today.month, dt.month) != (12, 1):
                 format = self.DATE_FORMATS_NO_YEAR[locale]
         return babel.dates.format_date(dt, format, locale=locale)
 
-    def datetime(self, locale, dt, **kwargs):
+    def datetime(self, locale, dt, format=None, **kwargs):
         optional_year = kwargs.get('optional_year', False)
-        format = self.DATETIME_FORMATS[locale]
+        if format is None:
+            format = self.DATETIME_FORMATS[locale]
         relative = kwargs.get('relative', False)
         if relative:
             delta = datetime.datetime.now() - dt
@@ -219,12 +221,12 @@ class Component(base.Component):
             end_dt = start_dt
         key = ''
         for attr in ['year', 'month', 'day']:
-            if getattr(start_dt, attr)!=getattr(end_dt, attr):
+            if getattr(start_dt, attr) != getattr(end_dt, attr):
                 break
             key += attr[0]
-        start_format, end_format = self.RANGE_FORMATS[locale][key]
+        start_format, end_format = self.DATERANGE_FORMATS[locale][key]
         return self.format_date(locale, start_dt, start_format) + \
-            self.format_date(lcoale, end_dt, end_format)
+            self.format_date(locale, end_dt, end_format)
 
     def isodate(self, dt):
         return self.timezone.localize(dt).isoformat()
