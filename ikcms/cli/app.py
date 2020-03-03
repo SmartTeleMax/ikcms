@@ -12,7 +12,7 @@ from .base import Cli
 class AppCli(Cli):
     name = 'app'
 
-    def command_serve(self, host=None, port=None):
+    def command_serve(self, host=None, port=None, cfg=''):
 
         def http_process(host, port, stdin):
             sys.stdin = stdin
@@ -28,7 +28,7 @@ class AppCli(Cli):
         p1 = Process(target=http_process, args=(host, port, stdin))
         p1.start()
 
-        cfg = self.create_cfg()
+        cfg = self.create_cfg(custom_cfg_path=cfg)
 
         extra_files = []
         for root, dirnames, filenames in os.walk(cfg.ROOT_DIR):
