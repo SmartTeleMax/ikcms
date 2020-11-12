@@ -28,7 +28,7 @@ class POTranslations(Translations):
     def _parse(self, fp):
         catalog = read_po(fp, locale=self.locale)
         self._catalog = c = {}
-        for message in catalog._messages.itervalues():
+        for message in iter(catalog._messages.values()):
             if message.pluralizable:
                 for idx, string in enumerate(message.string):
                     c[message.id[0], idx] = string
