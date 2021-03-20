@@ -10,23 +10,24 @@ from iktomi.cli.app import MAXFD
 from .base import Cli
 
 
+def http_process(host, port, stdin_fdno, app_factory):
+    sys.stdin = os.fdopen(stdin_fdno)
+    from wsgiref.simple_server import make_server
+    app = app_factory.create_app()
+    host = host or app.cfg.HTTP_SERVER_HOST
+    port = port and int(port) or app.cfg.HTTP_SERVER_PORT
+    print('Staring HTTP server {}:{}...'.format(host, port))
+    server = make_server(host, port, app)
+    server.serve_forever()
+
+
 class AppCli(Cli):
     name = 'app'
 
     def command_serve(self, host=None, port=None, cfg=''):
 
-        def http_process(host, port, stdin):
-            sys.stdin = stdin
-            from wsgiref.simple_server import make_server
-            app = self.create_app()
-            host = host or app.cfg.HTTP_SERVER_HOST
-            port = port and int(port) or app.cfg.HTTP_SERVER_PORT
-            print('Staring HTTP server {}:{}...'.format(host, port))
-            server = make_server(host, port, app)
-            server.serve_forever()
-
-        stdin = os.fdopen(os.dup(sys.stdin.fileno()))
-        p1 = Process(target=http_process, args=(host, port, stdin))
+        stdin = os.dup(sys.stdin.fileno())
+        p1 = Process(target=http_process, args=(host, port, stdin, self))
         p1.start()
 
         cfg = self.create_cfg(custom_cfg_path=cfg)
