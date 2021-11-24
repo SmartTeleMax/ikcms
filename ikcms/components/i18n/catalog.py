@@ -1,3 +1,4 @@
+import six
 import os
 import warnings
 from pkg_resources import resource_stream
@@ -28,7 +29,7 @@ class POTranslations(Translations):
     def _parse(self, fp):
         catalog = read_po(fp, locale=self.locale)
         self._catalog = c = {}
-        for message in catalog._messages.itervalues():
+        for message in six.itervalues(catalog._messages):
             if message.pluralizable:
                 for idx, string in enumerate(message.string):
                     c[message.id[0], idx] = string

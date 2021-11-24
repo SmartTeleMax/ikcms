@@ -1,4 +1,5 @@
 import ikcms.apps.base
+import ikcms.apps.composite
 
 
 class App(ikcms.apps.base.App):

@@ -80,7 +80,7 @@ class AppsCfg(dict):
     def load(cls, filepath=None):
         try:
             with open(filepath or cls.DEFAULT_FILEPATH) as f:
-                cfg = yaml.load(f)
+                cfg = yaml.safe_load(f)
         except OSError:
             print("Can't open file {}".format(filepath))
             sys.exit()

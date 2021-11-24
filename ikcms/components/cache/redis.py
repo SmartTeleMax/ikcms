@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import six
 import time
 import random
 
@@ -115,7 +116,10 @@ class Component(base.Component):
         return cls(app, client=redis.StrictRedis.from_url(url))
 
     def get(self, key):
-        return self.client.get(key)
+        result = self.client.get(key)
+        if isinstance(result, six.binary_type):
+            return result.decode()
+        return result
 
     def mget(self, *keys):
         return self.client.mget(*keys)

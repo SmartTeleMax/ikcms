@@ -1,4 +1,5 @@
 # coding: utf8
+import six
 import os
 import logging
 import datetime
@@ -54,7 +55,7 @@ class Lang(str):
         return self.locale.months[type][form]
 
     def gettext(self, msgid):
-        message = self.translations.gettext(unicode(msgid))
+        message = self.translations.gettext(six.u(msgid))
         if not message:
             return msgid
         if isinstance(msgid, Markup):

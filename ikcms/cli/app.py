@@ -8,7 +8,55 @@ from iktomi.cli.app import wait_for_code_change
 from iktomi.cli.app import flush_fds
 from iktomi.cli.app import MAXFD
 from .base import Cli
+import logging
+import time
+from itertools import chain
+import logging
 
+logging.basicConfig()
+logger = logging.getLogger()
+
+
+def iter_module_files():
+    for module in sys.modules.values():
+        filename = getattr(module, '__file__', None)
+        if filename:
+            while not os.path.isfile(filename): # pragma: no cover
+                # NOTE: this code is needed for the cases of importing
+                # from archive or custom importers
+                # for example, if we importing from archive foo.zip
+                # module named zipped, then this zipped.__file__ will equal
+                # to foo.zip/zipped.py, and os.path.dirname will give us
+                # file, not directory.
+                # It is marked as pragma: no cover, because this code was taken
+                # from werkzeug and we believe that it is tested
+                filename = os.path.dirname(filename)
+                if not filename:
+                    break
+            else:
+                if filename.endswith(('.pyc', '.pyo')):
+                    filename = filename[:-1]
+                yield filename
+
+def wait_for_code_change(extra_files=None, interval=1):
+    mtimes = {}
+    while 1:
+        for filename in chain(iter_module_files(), extra_files or ()):
+            try:
+                mtime = os.stat(filename).st_mtime
+            except OSError: # pragma: no cover
+                # this is cannot be guaranteed covered by coverage because of interpreter optimization
+                # see https://bitbucket.org/ned/coveragepy/issues/198/continue-marked-as-not-covered#comment-4052311
+
+                continue
+
+            old_time = mtimes.get(filename)
+            if old_time is None:
+                mtimes[filename] = mtime
+            elif mtime > old_time:
+                logger.info('Changes in file "%s"', filename)
+                return
+        time.sleep(interval)
 
 def http_process(host, port, stdin_fdno, app_factory):
     sys.stdin = os.fdopen(stdin_fdno)

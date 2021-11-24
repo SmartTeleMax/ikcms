@@ -1,3 +1,4 @@
+import six
 from iktomi.db.sqla.types import Html
 
 from lxml import html
@@ -26,7 +27,7 @@ class ExpandableMarkup(object):
     def __eq__(self, other):
         if isinstance(other, ExpandableMarkup):
             return self.markup == other.markup
-        if isinstance(other, basestring):
+        if isinstance(other, six.string_types):
             return self.markup == other
         return False
 
@@ -44,5 +45,5 @@ class ExpandableHtml(Html):
 
     def process_bind_param(self, value, dialect):
         if value is not None:
-            return unicode(value.markup)
+            return six.u(value.markup)
 

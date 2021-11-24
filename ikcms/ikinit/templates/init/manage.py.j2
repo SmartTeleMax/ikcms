@@ -10,7 +10,7 @@ if __name__ == '__main__':
         with open('apps.yaml') as f:
             apps_cfg = yaml.load(f)
     except OSError:
-        print("Can't open file {}".format(filepath))
+        print("Can't open file {}".format('apps.yaml'))
         sys.exit()
 
     apps = apps_cfg.get('apps', [])
