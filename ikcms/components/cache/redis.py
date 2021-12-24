@@ -36,8 +36,8 @@ class Lock(object):
                 pipe.watch(self.key)
                 lock_id = pipe.get(self.key)
                 if lock_id == self.lock_id:
-                    pipe.delete(self.key)
                     pipe.execute()
+                    pipe.delete(self.key)
                 else:
                     raise self.component.LockLosted(self.key)
             except self.component.WatchError:
@@ -50,12 +50,15 @@ class Pipe(object):
         self._pipe = pipe
 
     def get(self, key):
-        return self._pipe.get(key)
+        result = self._pipe.get(key)
+        if isinstance(result, six.binary_type):
+            return result.decode()
+        return result
 
     def mget(self, *keys):
         return self._pipe.mget(*keys)
 
-    def set(self, key, value, expires=0):
+    def set(self, key, value, expires=None):
         return self._pipe.set(key, value, ex=expires)
 
     def mset(self, mapping):
@@ -73,7 +76,7 @@ class Pipe(object):
     def hmset(self, key, mapping):
         return self._pipe.hmset(key, mapping)
 
-    def hkeys(self, name):
+    def hkeys(self, key):
         return self._pipe.hkeys(key)
 
     def hvals(self, key):
@@ -91,8 +94,12 @@ class Pipe(object):
     def watch(self, key):
         return self._pipe.watch(key)
 
+    def execute(self):
+        return self._pipe.execute()
+
     def __enter__(self):
-        return self._pipe.__enter__()
+        self._pipe.__enter__()
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         return self._pipe.__exit__(exc_type, exc_value, traceback)
@@ -148,14 +155,14 @@ class Component(base.Component):
     def hmset(self, key, mapping):
         return self.client.hmset(key, mapping)
 
-    def hkeys(self, name):
+    def hkeys(self, key):
         return self.client.hkeys(key)
 
     def hvals(self, key):
         return self.client.hvals(key)
 
     def hdel(self, key, *hkeys):
-        return self._pipe.hdel(key, *hkeys)
+        return self.client.hdel(key, *hkeys)
 
     def pipe(self):
         return Pipe(self, self.client.pipeline())

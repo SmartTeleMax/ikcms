@@ -98,6 +98,8 @@ class CachedModel(object):
         now_ts = int(time.time())
         try:
             db_updated_ts = self.get_updated_ts_from_db()
+            if db_updated_ts is None:
+                return None
         except sa.exc.DBAPIError as exc:
             logger.warning('Retrieve {} error: {}'.format(self.model, exc))
             return None
