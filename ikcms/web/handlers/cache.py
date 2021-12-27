@@ -1,6 +1,9 @@
 import logging
 from hashlib import md5
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 from .. import Request
 from .. import Response
 from .. import WebHandler

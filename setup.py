@@ -21,7 +21,7 @@ if BABEL:
 
 setup(
     name='ikcms',
-    version='0.4',
+    version='0.5',
     packages=find_packages(),
     package_dir={'ikcms': 'ikcms'},
     test_suite='nose.collector',
