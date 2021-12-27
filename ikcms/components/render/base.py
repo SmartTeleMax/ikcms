@@ -53,4 +53,8 @@ class RenderComponent(Component):
         return Response(result, content_type=content_type)
 
     def to_json(self, context, content_type='application/json'):
-        return Response(dumps(context), content_type=content_type)
+        return Response(
+            dumps(context),
+            content_type=content_type,
+            charset='UTF-8',
+        )
